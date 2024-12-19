@@ -1,3 +1,4 @@
+require('dotenv').config(); 
 const express = require("express");
 const bodyParser = require("body-parser");
 const mysql = require("mysql2");
@@ -8,12 +9,12 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Database connection
+
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "ezhil",
-    database: "employee_db",
+    host: process.env.DB_HOST,       
+    user: process.env.DB_USER,       
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME    
 });
 
 db.connect((err) => {
@@ -21,7 +22,7 @@ db.connect((err) => {
     console.log("Database connected");
 });
 
-// Employee validation schema
+
 const employeeSchema = Joi.object({
     name: Joi.string().required(),
     employeeId: Joi.string().alphanum().max(10).required(),
@@ -32,7 +33,6 @@ const employeeSchema = Joi.object({
     role: Joi.string().required(),
 });
 
-// Add Employee API
 app.post("/add-employee", (req, res) => {
     const { error, value } = employeeSchema.validate(req.body);
     if (error) return res.status(400).send({ message: error.details[0].message });
